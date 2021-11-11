@@ -1,0 +1,25 @@
+Package: mapSpecies
+Type: Package
+Title: Map species distribution
+Version: 0.2
+Date: 2021-07-26
+Authors@R: c(person("F. Guillaume", "Blanchet", email = "guillaume.blanchet@usherbrooke.ca" , role = c("aut","cre"), comment = c(ORCID = "0000-0001-5149-2488")),
+             person("François", "Rousseu", role = c("ctb"), comment = c(ORCID = "0000-0002-2400-2479")))
+Maintainer: F. Guillaume Blanchet <guillaume.blanchet@usherbrooke.ca>
+Description: A set of routines to map species distribution in space and through time.
+License: GPL (>= 2)
+Depends:
+    R (>= 4.0.3),
+    INLA,
+    sp,
+    spacetime,
+    rgeos,
+    raster,
+    deldir,
+    Matrix,
+    parallel,
+    exactextractr
+RoxygenNote: 7.1.1
+Encoding: UTF-8
+Suggests: 
+    testthat
