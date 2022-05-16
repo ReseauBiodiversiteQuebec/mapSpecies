@@ -6,7 +6,7 @@
 #' @param dims A vector of length 2 defining the number of pixels to use as rows and columns to define the map.
 #' @param type Either "mean", "sd", "0.025quant", "0.5quant", "0.975quant", "mode" or "space". Defines the map to be drawn. If "space", maps the mean of the spatial field.
 #' @param sPoly A spatial polygon to isolate the region of interest. If none is given, a map is drawn for the entire region covered by the mesh. 
-#' @param sample Logical. Whether to sample from the posterior distribution of each cell using \code{INLA}\'s \code{inla.posterior.sample}. Returns a raster stack of each sample along with other types specified. Default to \code{TRUE}. Currently ignored.
+#' @param sample Logical. Whether to sample from the posterior distribution of each cell using \code{INLA}'s \code{inla.posterior.sample}. Returns a raster stack of each sample along with other types specified. Default to \code{FALSE}. Currently ignored.
 #' @param nsamples Integer. Number of samples to draw from the posterior. Ignored if \code{sample = FALSE}.
 #' 
 #' @importFrom INLA inla.mesh.projector

@@ -22,7 +22,7 @@ mapSpace(
 
 \item{sPoly}{A spatial polygon to isolate the region of interest. If none is given, a map is drawn for the entire region covered by the mesh.}
 
-\item{sample}{Logical. Whether to sample from the posterior distribution of each cell using \code{INLA}\'s \code{inla.posterior.sample}. Returns a raster stack of each sample along with other types specified. Default to \code{TRUE}. Currently ignored.}
+\item{sample}{Logical. Whether to sample from the posterior distribution of each cell using \code{INLA}'s \code{inla.posterior.sample}. Returns a raster stack of each sample along with other types specified. Default to \code{FALSE}. Currently ignored.}
 
 \item{nsamples}{Integer. Number of samples to draw from the posterior. Ignored if \code{sample = FALSE}.}
 }
