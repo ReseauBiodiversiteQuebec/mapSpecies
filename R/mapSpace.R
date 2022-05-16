@@ -6,10 +6,13 @@
 #' @param dims A vector of length 2 defining the number of pixels to use as rows and columns to define the map.
 #' @param type Either "mean", "sd", "0.025quant", "0.5quant", "0.975quant", "mode" or "space". Defines the map to be drawn. If "space", maps the mean of the spatial field.
 #' @param sPoly A spatial polygon to isolate the region of interest. If none is given, a map is drawn for the entire region covered by the mesh. 
+#' @param sample Logical. Whether to sample from the posterior distribution of each cell using \code{INLA}'s \code{inla.posterior.sample}. Returns a raster stack of each sample along with other types specified. Default to \code{TRUE]. Currently ignored.
+#' @param nsamples Integer. Number of samples to draw from the posterior. Ignored if \code{sample = FALSE}.
 #' 
 #' @importFrom INLA inla.mesh.projector
 #' @importFrom INLA inla.mesh.project
 #' @importFrom INLA inla.stack.index
+#' @importFrom INLA inla.posterior.sample
 #' @importFrom raster raster
 #' @importFrom raster mask
 #' @importFrom raster xmin
@@ -24,7 +27,7 @@
 mapSpace <- function(modelSpace, dims, 
                        type = c("mean", "sd", "0.025quant", 
                                 "0.5quant", "0.975quant",
-                                "mode","space"), sPoly = NULL){
+                                "mode","space"), sPoly = NULL, sample = FALSE, nsamples = 100){
   ### General check
   if(length(type) > 1){
     stop("Only one type should be defined")
