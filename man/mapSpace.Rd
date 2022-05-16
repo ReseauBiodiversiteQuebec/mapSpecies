@@ -8,7 +8,9 @@ mapSpace(
   modelSpace,
   dims,
   type = c("mean", "sd", "0.025quant", "0.5quant", "0.975quant", "mode", "space"),
-  sPoly = NULL
+  sPoly = NULL,
+  sample = FALSE,
+  nsamples = 100
 )
 }
 \arguments{
@@ -19,6 +21,8 @@ mapSpace(
 \item{type}{Either "mean", "sd", "0.025quant", "0.5quant", "0.975quant", "mode" or "space". Defines the map to be drawn. If "space", maps the mean of the spatial field.}
 
 \item{sPoly}{A spatial polygon to isolate the region of interest. If none is given, a map is drawn for the entire region covered by the mesh.}
+
+\item{nsamples}{Integer. Number of samples to draw from the posterior. Ignored if \code{sample = FALSE}.}
 }
 \description{
 Constructs mean, standard deviation, and quantile (0.025, 0.5 and 0.975) maps for models calculated using \code{\link{uniSpace}} and \code{\link{ppSpace}}
