@@ -50,7 +50,7 @@
 #' @keywords manip
 #'
 #' @export
-explanaMesh <- function(sPoly, meshSpace, meshTime, X=NULL, verbose = TRUE){
+explanaMesh <- function(sPoly, meshSpace, meshTime = NULL, X = NULL, verbose = TRUE){
   #=================
   # Check projection
   #=================

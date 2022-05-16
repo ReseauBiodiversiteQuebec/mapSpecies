@@ -4,7 +4,7 @@
 \alias{explanaMesh}
 \title{Prepare data for model construction}
 \usage{
-explanaMesh(sPoly, meshSpace, meshTime, X = NULL, verbose = TRUE)
+explanaMesh(sPoly, meshSpace, meshTime = NULL, X = NULL, verbose = TRUE)
 }
 \arguments{
 \item{sPoly}{A \code{\link[sp]{SpatialPolygons}} or a \code{\link[sp]{SpatialPolygonsDataFrame}} defining the sampling region.}
