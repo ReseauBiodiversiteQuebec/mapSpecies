@@ -18,7 +18,8 @@ Depends:
     deldir,
     Matrix,
     parallel,
-    exactextractr
+    exactextractr,
+    terra
 RoxygenNote: 7.1.2
 Encoding: UTF-8
 Suggests: 
