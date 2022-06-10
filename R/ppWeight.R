@@ -4,26 +4,27 @@
 #' 
 #' @param sPoly A \code{SpatialPolygons*} object.
 #' @param mesh An \code{inla.mesh} object
-#' @param verbose If \code{TRUE}, prints each iteration.
 #' 
 #' @return 
 #' 
 #' An object of class \code{ppWeight} which returns a vector of weights. 
 #' 
-#' @importFrom rgeos gIntersects
-#' @importFrom rgeos gArea
-#' @importFrom rgeos gIntersection
+#' @importFrom sf st_as_sf
+#' @importFrom sf st_intersects
+#' @importFrom sf st_intersection
+#' @importFrom sf st_area
 #'
 #' @export
 #' 
 #' @keywords models
 #' 
-ppWeight <- function(sPoly, mesh, verbose = FALSE){
+ppWeight <- function(sPoly, mesh){
   #-------------------------------------------------
   ### Construct a dual mesh from the triangular mesh
   #-------------------------------------------------
   dmesh <- inla.mesh.dual(mesh)
   crs(dmesh) <- mesh$crs
+  dmeshsf<-st_as_sf(dmesh) # temporary to use sf
   
   #--------------------------------------------------------------
   ### Find the intersection between the polygons in the dual mesh
@@ -31,16 +32,15 @@ ppWeight <- function(sPoly, mesh, verbose = FALSE){
   #--------------------------------------------------------------
 
   ### Calculate weight
-  weight <- numeric()
-  
-  for(i in 1:length(dmesh)){
-    if(gIntersects(dmesh[i,], sPoly)){
-      weight[i] <- gArea(gIntersection(dmesh[i,], sPoly))
-      if(verbose){print(i)}
-    }else{
-      weight[i] <- 0
-    }
+  weight <- numeric(nrow(dmeshsf))
+  overlaps <- st_intersects(dmeshsf, st_as_sf(sPoly))
+  cuts <- st_intersection(dmeshsf, st_as_sf(sPoly))
+  w <- which(as.logical(sapply(overlaps, length)))
+  areas <- as.numeric(st_area(cuts))
+  if(length(w)!=length(areas)){
+    stop("Number of resulting polygons different from the number of touching cells")
   }
+  weight[w] <- areas
   
   ### Check to make sure there are integration points with 0 weight
   if(all(weight > 0)){

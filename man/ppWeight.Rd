@@ -4,14 +4,12 @@
 \alias{ppWeight}
 \title{Calculate weight for the integration of the point process}
 \usage{
-ppWeight(sPoly, mesh, verbose = FALSE)
+ppWeight(sPoly, mesh)
 }
 \arguments{
 \item{sPoly}{A \code{SpatialPolygons*} object.}
 
 \item{mesh}{An \code{inla.mesh} object}
-
-\item{verbose}{If \code{TRUE}, prints each iteration.}
 }
 \value{
 An object of class \code{ppWeight} which returns a vector of weights.

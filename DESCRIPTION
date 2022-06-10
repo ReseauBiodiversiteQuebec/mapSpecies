@@ -19,6 +19,7 @@ Depends:
     Matrix,
     parallel,
     exactextractr,
+    sf,
     terra
 RoxygenNote: 7.1.2
 Encoding: UTF-8
