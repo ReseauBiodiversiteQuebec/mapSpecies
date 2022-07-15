@@ -16,6 +16,7 @@ ppSpace(
   fix = NULL,
   sboffset = NULL,
   orthoCons = FALSE,
+  verbose = FALSE,
   ...
 )
 }
@@ -41,6 +42,8 @@ ppSpace(
 \item{sboffset}{A character string with the name of the variable in the raster stack that should be used as an offset to scaled down the integration weights according to the level of effort across the study region. See details for further explanations. Default is \code{NULL}.}
 
 \item{orthoCons}{Set to \code{TRUE} to force all the variance to go into the fixed effects. Sets constraints to have spatial field orthogonal to predictors. Experimental and currently not working...}
+
+\item{verbose}{Set to \code{TRUE} to print the different steps being executed and to make INLA verbose.}
 
 \item{\dots}{Arguments passed to \code{inla}}
 }

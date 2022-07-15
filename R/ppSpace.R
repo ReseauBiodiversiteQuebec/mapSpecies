@@ -14,6 +14,7 @@
 #' @param fix A vector with the name of variables in the model that should be fixed to a given value when doing predictions. These values are used to map the intensities across the study area for a given value. Currently, the maximum of each variable is used as the fixed value, but it should be made more flexible in the future for example for playing more easily with climate change scenarios. Default is \code{NULL}, meaning no variables are fixed.
 #' @param sboffset A character string with the name of the variable in the raster stack that should be used as an offset to scaled down the integration weights according to the level of effort across the study region. See details for further explanations. Default is \code{NULL}.
 #' @param orthoCons Set to \code{TRUE} to force all the variance to go into the fixed effects. Sets constraints to have spatial field orthogonal to predictors. Experimental and currently not working...
+#' @param verbose Set to \code{TRUE} to print the different steps being executed and to make INLA verbose.
 #' @param \dots Arguments passed to \code{inla}
 #'
 #' @details 
@@ -75,6 +76,7 @@ ppSpace <- function(formula,
                     fix = NULL,
                     sboffset = NULL,
                     orthoCons = FALSE,
+                    verbose = FALSE,
                     ...){
 
   #============
@@ -88,6 +90,15 @@ ppSpace <- function(formula,
   if(!identical(attributes(ppWeight)$mesh$graph, explanaMesh$meshSpace$graph)){
     stop("'ppWeight' and 'explanaMesh' were constructed using different mesh")
   }
+  
+
+  # Function that prints the different steps
+  checkpoint<-function(msg=""){
+    if(verbose){
+      cat(paste(Sys.time(),msg,sep=" - "),"\n")
+    }
+  }
+  
   
   #======================================
   # If there are no explanatory variables
@@ -123,7 +134,12 @@ ppSpace <- function(formula,
   #====================================================
   
   if(!is.null(sboffset)){
+    
+    checkpoint("Intersecting sPoly and dual mesh")
     polys <- gIntersection(explanaMesh$sPoly,attributes(ppWeight)$dmesh,byid=TRUE)
+    checkpoint("Done")
+    
+    checkpoint("Extracting sboffset")
     e <- exact_extract(explanaMesh$X[[sboffset]], 
                        polys, 
                        fun = function(values, coverage){
@@ -131,6 +147,7 @@ ppSpace <- function(formula,
                        },progress = FALSE)
     k <- ppWeight > 0
     ppWeight[k] <- ppWeight[k] * ((e/ppWeight[k])/max(e/ppWeight[k]))
+    checkpoint("Done")
   }
   
   
@@ -140,14 +157,16 @@ ppSpace <- function(formula,
   if(many){
     # Aggregate spatial data
     xyDF <- as.data.frame(xy)
-    spaceAgg <- aggData(xyDF, explanaMesh$meshSpace)
     
+    checkpoint("Aggregating observations to dual mesh cells")
+    spaceAgg <- aggData(xyDF, explanaMesh$meshSpace)
     # Pseudo-absences are the number of edges on the mesh
     # Occurences are the number of points
     yPP <- spaceAgg$Freq
-    
     # weight associated to pseudo-absences (w) and occurrences (0)
     ePP <- ppWeight[spaceAgg$space]
+    checkpoint("Done")
+    
   }else{
     # Pseudo-absences are the number of edges on the mesh
     # Occurences are the number of points
@@ -239,6 +258,7 @@ ppSpace <- function(formula,
     names(Xbrick) <- colnames(Xorg)
     
     # Extract covariate values for model estimation for both many = TRUE and many = FALSE
+    checkpoint("Extracting predictors for dual mesh cells")
     XEst <- exact_extract(Xbrick, 
                           attributes(ppWeight)$dmesh, 
                           fun = function(values, coverage_fraction){
@@ -247,6 +267,7 @@ ppSpace <- function(formula,
                           },
                           force_df = FALSE,
                           progress = FALSE)
+    checkpoint("Done")
     
     if(is.matrix(XEst)){
       # When there are multiple explanatory variables
@@ -359,11 +380,12 @@ ppSpace <- function(formula,
     }
   }
   
+  checkpoint("Running model")
   model <- inla(formule, family = "poisson", 
                 data = inla.stack.data(Stack),
                 control.predictor = list(A = inla.stack.A(Stack), 
                                          link = 1),
-                E = inla.stack.data(Stack)$e, ...)
+                E = inla.stack.data(Stack)$e, verbose = verbose, ...)
   
   nameRes <- names(model)
   
