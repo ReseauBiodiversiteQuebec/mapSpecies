@@ -20,7 +20,9 @@ aggData <- function(xyt, meshSpace, meshTime=NULL, meshDual){
   ### Aggregate data points over space and time
   #============================================
   
-  o <- st_intersects(st_as_sf(meshDual), st_as_sf(xyt))
+  meshDual <- st_as_sf(meshDual) # temporary
+  
+  o <- st_intersects(meshDual, st_as_sf(xyt))
   spaceAgg <- data.frame(space = 1:nrow(meshDual), Freq = lengths(o))
 
   
