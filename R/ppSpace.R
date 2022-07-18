@@ -159,7 +159,7 @@ ppSpace <- function(formula,
     xyDF <- as.data.frame(xy)
     
     checkpoint("Aggregating observations to dual mesh cells")
-    spaceAgg <- aggData(xyDF, explanaMesh$meshSpace)
+    spaceAgg <- aggData(sPoints, meshSpace = explanaMesh$meshSpace, meshDual = attributes(ppWeight)$dmesh)
     # Pseudo-absences are the number of edges on the mesh
     # Occurences are the number of points
     yPP <- spaceAgg$Freq
