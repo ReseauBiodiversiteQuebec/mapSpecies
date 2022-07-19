@@ -23,18 +23,16 @@ ppWeight <- function(sPoly, mesh){
   ### Construct a dual mesh from the triangular mesh
   #-------------------------------------------------
   dmesh <- inla.mesh.dual(mesh)
-  crs(dmesh) <- mesh$crs
-  dmeshsf<-st_as_sf(dmesh) # temporary to use sf
-  
+
   #--------------------------------------------------------------
   ### Find the intersection between the polygons in the dual mesh
   ### and the location domain
   #--------------------------------------------------------------
 
   ### Calculate weight
-  weight <- numeric(nrow(dmeshsf))
-  overlaps <- st_intersects(dmeshsf, st_as_sf(sPoly))
-  cuts <- st_intersection(dmeshsf, st_as_sf(sPoly))
+  weight <- numeric(nrow(dmesh))
+  overlaps <- st_intersects(dmesh, st_as_sf(sPoly))
+  cuts <- st_intersection(dmesh, st_as_sf(sPoly))
   w <- which(as.logical(sapply(overlaps, length)))
   areas <- as.numeric(st_area(cuts))
   if(length(w)!=length(areas)){
@@ -48,7 +46,7 @@ ppWeight <- function(sPoly, mesh){
   }
   
   ### Return mesh
-  attributes(weight) <- list(mesh=mesh,dmesh=dmesh)
+  attributes(weight) <- list(mesh=mesh,dmesh=as(dmesh,"Spatial"))
   
   class(weight) <- "ppWeight"
   
