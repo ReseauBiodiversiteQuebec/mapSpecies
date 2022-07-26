@@ -65,6 +65,7 @@
 #' @export
 #' 
 #' @keywords models
+#' 
 ppSpace <- function(formula,
                     sPoints, 
                     ppWeight, 
@@ -79,6 +80,21 @@ ppSpace <- function(formula,
                     verbose = FALSE,
                     ...){
 
+  
+  #============
+  # Internal function for faster intersections
+  #============
+  
+  st_intersection_faster <- function(x, y) {
+    x$id<-1:nrow(x)
+    o1 <- lengths(st_intersects(x, y))
+    o2 <- lengths(st_within(x, y))
+    o <- o1 > 0L & !o2 > 0L
+    suppressWarnings(cuts <- st_intersection(y, x[o, ]))
+    cuts <- rbind(cuts, x[o2 > 0L, ])
+    cuts[order(cuts$id), ]
+  }
+  
   #============
   # Basic check
   #============
@@ -91,7 +107,7 @@ ppSpace <- function(formula,
     stop("'ppWeight' and 'explanaMesh' were constructed using different mesh")
   }
   
-
+  
   # Function that prints the different steps
   checkpoint<-function(msg=""){
     if(verbose){
@@ -116,11 +132,12 @@ ppSpace <- function(formula,
   #==============
   # Basic objects
   #==============
-  nsPoints <- length(sPoints)
+  #nsPoints <- length(sPoints)
+  nsPoints <- nrow(sPoints)
   nEdges <- explanaMesh$meshSpace$n
-  xy <- coordinates(sPoints)
+  xy <- st_coordinates(sPoints)
   colnames(xy) <- c("x","y") 
-
+  
   #============
   # Define SPDE
   #============
@@ -128,7 +145,7 @@ ppSpace <- function(formula,
                               alpha=smooth,
                               prior.range=prior.range,
                               prior.sigma=prior.sigma)
-
+  
   #====================================================
   # Rescale weights if sampling bias offset is included
   #====================================================
@@ -136,7 +153,7 @@ ppSpace <- function(formula,
   if(!is.null(sboffset)){
     
     checkpoint("Intersecting sPoly and dual mesh")
-    polys <- gIntersection(explanaMesh$sPoly,attributes(ppWeight)$dmesh,byid=TRUE)
+    polys <- st_intersection_faster(explanaMesh$sPoly,attributes(ppWeight)$dmesh)
     checkpoint("Done")
     
     checkpoint("Extracting sboffset")
@@ -250,12 +267,8 @@ ppSpace <- function(formula,
                                               na.action = NULL))[,-1,drop=FALSE]
     
     # Construct a brick out of Xorg
-    xyXorg <- cbind(coordinates(explanaMesh$X),Xorg)
-    Xbrick <- rasterFromXYZ(xyXorg)
-    if(nlayers(Xbrick) == 1){
-      Xbrick <- brick(Xbrick)  
-    }
-    names(Xbrick) <- colnames(Xorg)
+    xyXorg <- cbind(xyFromCell(explanaMesh$X,1:ncell(explanaMesh$X)),Xorg)
+    Xbrick <- rast(xyXorg, type="xyz",crs=crs(explanaMesh$X))
     
     # Extract covariate values for model estimation for both many = TRUE and many = FALSE
     checkpoint("Extracting predictors for dual mesh cells")
@@ -281,9 +294,8 @@ ppSpace <- function(formula,
     
     # Extract covariate values also at sampled location for XEst
     if(!many){
-      locEst <- SpatialPoints(coords = xy)
-      XEstSmpl <- extract(Xbrick, locEst)
-      
+      locEst <- st_as_sf(as.data.frame(xy),coords = c("x","y"))
+      XEstSmpl <- extract(Xbrick, vect(locEst))
       XEst <- rbind(XEst, XEstSmpl)
     }
     
@@ -416,3 +428,5 @@ ppSpace <- function(formula,
   
   return(model)
 }
+
+
