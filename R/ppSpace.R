@@ -46,10 +46,9 @@
 #' 
 #' Simpson, D. Illian, J. B., Lindgren, F. Sørbye, S. H. and Rue, H. 2016. Going off grid: computationally efficient inference for log-Gaussian Cox processes. Biometrika, 103(1): 49-70 \url{https://doi.org/10.1093/biomet/asv064}
 #'
-#' @importFrom sp coordinates
-#' @importFrom raster rasterFromXYZ
-#' @importFrom sp SpatialPoints
-#' @importFrom raster extract
+#' @importFrom terra xyFromCell
+#' @importFrom terra extract
+#' @importFrom terra values
 #' @importFrom INLA inla
 #' @importFrom INLA inla.spde2.pcmatern
 #' @importFrom INLA inla.spde.make.A
