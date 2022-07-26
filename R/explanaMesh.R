@@ -57,7 +57,7 @@ explanaMesh <- function(sPoly, meshSpace, meshTime = NULL, X = NULL, verbose = T
   
   sPoly <- as(sPoly, "Spatial") # temporary
   if(!is.null(X)){ # temporary
-    if(nlayers(X)==1){
+    if(nlyr(X)==1){
       X <- raster(X)
     }else{
       X <- stack(X) 
