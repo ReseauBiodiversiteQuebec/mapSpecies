@@ -54,6 +54,17 @@ explanaMesh <- function(sPoly, meshSpace, meshTime = NULL, X = NULL, verbose = T
   #=================
   # Check projection
   #=================
+  
+  sPoly <- as(sPoly, "Spatial") # temporary
+  if(!is.null(X)){ # temporary
+    if(nlayers(X)==1){
+      X <- raster(X)
+    }else{
+      X <- stack(X) 
+    }
+  }
+  
+  
   # Extract projection of objects
   projSp <- crs(sPoly)@projargs
   
@@ -245,6 +256,11 @@ explanaMesh <- function(sPoly, meshSpace, meshTime = NULL, X = NULL, verbose = T
     }else{
       results <- list(sPoly = sPoly, meshSpace = meshSpace, meshTime = meshTime, X = NULL, Xmesh = NULL)
     }
+  }
+  
+  results$sPoly <- st_as_sf(sPoly) # temporary
+  if(!is.null(results$X)){ # temporary
+    results$X <- rast(results$X)
   }
   
   class(results) <- "explanaMesh"
