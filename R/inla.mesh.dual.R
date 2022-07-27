@@ -57,6 +57,7 @@ inla.mesh.dual <- function(mesh) {
       st_as_sf(st_as_sfc(plsin),crs=mesh$crs)
     },future.seed=NULL) # disable warnings about rng
     dmesh<-do.call("rbind",pls)
+    st_geometry(dmesh)<-"geometry"
     dmesh
   }else{ 
     stop("It only works for R2!")
