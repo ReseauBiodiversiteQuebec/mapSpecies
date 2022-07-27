@@ -78,21 +78,6 @@ ppSpace <- function(formula,
                     orthoCons = FALSE,
                     verbose = FALSE,
                     ...){
-
-  
-  #============
-  # Internal function for faster intersections
-  #============
-  
-  st_intersection_faster <- function(x, y) {
-    x$id<-1:nrow(x)
-    o1 <- lengths(st_intersects(x, y))
-    o2 <- lengths(st_within(x, y))
-    o <- o1 > 0L & !o2 > 0L
-    suppressWarnings(cuts <- st_intersection(y, x[o, ]))
-    cuts <- rbind(cuts, x[o2 > 0L, ])
-    cuts[order(cuts$id), ]
-  }
   
   #============
   # Basic check
