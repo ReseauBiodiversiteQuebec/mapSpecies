@@ -21,6 +21,7 @@ Depends:
     exactextractr,
     sf,
     terra,
+    future,
     future.apply
 RoxygenNote: 7.1.2
 Encoding: UTF-8
