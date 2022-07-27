@@ -151,13 +151,9 @@ ppSpace <- function(formula,
   
   if(!is.null(sboffset)){
     
-    checkpoint("Intersecting sPoly and dual mesh")
-    polys <- st_intersection_faster(explanaMesh$sPoly,attributes(ppWeight)$dmesh)
-    checkpoint("Done")
-    
     checkpoint("Extracting sboffset")
     e <- exact_extract(explanaMesh$X[[sboffset]], 
-                       polys, 
+                       attributes(ppWeight)$dmeshcuts, 
                        fun = function(values, coverage){
                          sum(values * coverage, na.rm = TRUE)
                        },progress = FALSE)
