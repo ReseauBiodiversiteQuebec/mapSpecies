@@ -18,7 +18,7 @@
 #' 
 #' @keywords models
 #' 
-ppWeight2 <- function(sPoly, mesh){
+ppWeight <- function(sPoly, mesh){
   #-------------------------------------------------
   ### Construct a dual mesh from the triangular mesh
   #-------------------------------------------------
