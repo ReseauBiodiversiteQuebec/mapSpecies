@@ -11,6 +11,8 @@ License: GPL (>= 2)
 Depends:
     R (>= 4.0.3),
     INLA,
+    future,
+    future.apply,
     sp,
     spacetime,
     rgeos,
@@ -20,9 +22,7 @@ Depends:
     parallel,
     exactextractr,
     sf,
-    terra,
-    future,
-    future.apply
+    terra
 RoxygenNote: 7.1.2
 Encoding: UTF-8
 Suggests: 
