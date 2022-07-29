@@ -25,82 +25,49 @@
 #' 
 #' An object of class \code{explanaMesh} that includes a list of all the objects used as arguments (except for the verbose call) and \code{Xmesh} the values of the explanatory variables for all edges of the mesh.
 #' 
-#' @importFrom sp SpatialPoints
-#' @importFrom sp bbox
-#' @importFrom raster crs
-#' @importFrom raster raster
-#' @importFrom raster res
-#' @importFrom raster extend
-#' @importFrom raster extent
-#' @importFrom raster rasterize
-#' @importFrom raster distance
-#' @importFrom raster brick
-#' @importFrom raster crop
-#' @importFrom raster mask
-#' @importFrom raster values
-#' @importFrom raster xyFromCell
-#' @importFrom raster ncell
-#' @importFrom raster cellFromXY
-#' @importFrom raster xmin
-#' @importFrom raster ymin
-#' @importFrom raster xmax
-#' @importFrom raster ymax
+#' @importFrom sf st_as_sf
+#' @importFrom sf st_crs
+#' @importFrom terra extract
+#' @importFrom terra xyFromCell
+#' @importFrom terra ncell
+#' @importFrom terra cellFromXY
+#' @importFrom terra vect
+#' @importFrom terra time
+#' @importFrom terra ext
+#' @importFrom terra xmin
+#' @importFrom terra xmax
+#' @importFrom terra ymin
+#' @importFrom terra ymax
 #' @importFrom stats dist
 #'
 #' @keywords manip
 #'
 #' @export
-explanaMesh <- function(sPoly, meshSpace, meshTime = NULL, X = NULL, verbose = TRUE){
+#' 
+explanaMesh2 <- function(sPoly, meshSpace, meshTime = NULL, X = NULL, verbose = TRUE){
   #=================
   # Check projection
   #=================
   
-  sPoly <- as(sPoly, "Spatial") # temporary
-  if(!is.null(X)){ # temporary
-    if(nlyr(X)==1){
-      X <- raster(X)
-    }else{
-      X <- stack(X) 
-    }
-  }
-  
-  
   # Extract projection of objects
-  projSp <- crs(sPoly)@projargs
-  
+  projSp <- st_crs(sPoly)
   if(!is.null(X)){
-    projX <- crs(X)@projargs
+    projX <- st_crs(X)
   }
-  
-  if(is.null(meshSpace$crs)){
-    projMesh <- NA
-  }else{
-    projMesh <- meshSpace$crs@projargs
-  }
+  projMesh <- st_crs(meshSpace$crs)
   
   if(is.null(X)){
-    proj <- c(projSp, projMesh)
+    proj <- list(projSp, projMesh)
   }else{
-    proj <- c(projSp, projMesh, projX)
+    proj <- list(projSp, projMesh, projX)
   }
   
-  # Check if all projections are NAs
-  if(all(is.na(proj))){
-    warning("All objects have NA as projection, make sure this is right")
-  }else{
-    if(any(is.na(proj))){
-      stop("At least one object has NA as projection")
-    }else{
-      if(is.null(X)){
-        if(!(proj[1] == proj[2])){
-          stop("The projection for at least one of the spatial object is different from the others")
-        }
-      }else{
-        if(!((proj[1] == proj[2]) & (proj[1] == proj[3]) & (proj[2] == proj[3]))){
-          stop("The projection for at least one of the spatial object is different from the others")
-        }
-      }
-    }
+  proja<-sapply(proj,function(i){
+    i == proj[[1]]
+  })
+  
+  if(!all(proja)){
+    stop("sPoly, meshSpace and X do not all have the same crs")
   }
   
   #===================
@@ -112,11 +79,11 @@ explanaMesh <- function(sPoly, meshSpace, meshTime = NULL, X = NULL, verbose = T
       stop("'meshTime' needs to be an object of class 'inla.mesh.1d'")
     }
     
-    # Check for z-value
+    # Check for time value
     if(!is.null(X)){
-      zval <- getZ(X)
+      zval <- time(X)
       if(!any(class(zval) == "POSIXct")){
-        stop("'X' needs to have z-values with a POSIXct class.")
+        stop("'X' needs to have time values with a POSIXct class.")
       }
       
       # Check layers names
@@ -128,7 +95,7 @@ explanaMesh <- function(sPoly, meshSpace, meshTime = NULL, X = NULL, verbose = T
       }
     }
   }
-
+  
   #============================================================
   # If the edges are not within the raster boundaries associate
   # them with a close by pixel
@@ -137,17 +104,13 @@ explanaMesh <- function(sPoly, meshSpace, meshTime = NULL, X = NULL, verbose = T
   # https://stackoverflow.com/questions/26652629/extracting-a-value-from-a-raster-for-a-specific-point-based-on-the-closest-cell
   #============================================================
   if(!is.null(X)){
-    # Make sure X is a stack, otherwise extract returns a vector
-    if(nlayers(X)==1){
-      X <- stack(X)  
-    }
-    
+
     # Extract the points
     pts <- meshSpace$loc[,1:2]
     
     # Find the quadrant around the raster in which the pixel is located
-    quad <- colSums(sapply(pts[, 1], '>', bbox(X)[1, ])) * 3 + 
-      colSums(sapply(pts[, 2], '>', bbox(X)[2, ]))
+    quad <- colSums(sapply(pts[, 1], '>', ext(X)[1:2])) * 3 + 
+      colSums(sapply(pts[, 2], '>', ext(X)[3:4]))
     
     Quad <- split(as.data.frame(pts), quad)
     
@@ -176,11 +139,11 @@ explanaMesh <- function(sPoly, meshSpace, meshTime = NULL, X = NULL, verbose = T
     new.pts, Quad, SIMPLIFY=FALSE), quad)
     
     # Construct SpatialPoints from meshSpace edges
-    loc <- SpatialPoints(coords = new.pts,
-                         proj4string = crs(sPoly))
+    loc <- st_as_sf(new.pts, coords=1:2,
+                    crs = st_crs(sPoly))
     
     # Extract values from X at loc
-    locVal <- extract(X, loc)
+    locVal <- extract(X, vect(loc), ID = FALSE) |> as.matrix()
     
     #==================================================
     # If there are some elements in locVal that are NAs
@@ -190,23 +153,24 @@ explanaMesh <- function(sPoly, meshSpace, meshTime = NULL, X = NULL, verbose = T
     nlocValNA <- length(locValNA)
     
     if(nlocValNA > 0){
-      loc <- SpatialPoints(coords = coordinates(loc)[locValNA,1:2],
-                           proj4string = crs(sPoly))
-      
+      loc <- loc[locValNA, ]
       for(i in 1:nlocValNA){
-        extX <- extent(X)
-        extDist <- dist(matrix(c(extX@xmin,extX@xmax,
-                                 extX@ymin,extX@ymax),nrow = 2))
+        extX <- ext(X)
+        extDist <- dist(matrix(c(extX$xmin,extX$xmax,
+                                 extX$ymin,extX$ymax),nrow = 2))
         buffer <- extDist/10
         locExtract <- extract(X,
-                              loc[i,],
+                              vect(loc[i,]),
                               buffer = buffer,
-                              fun = mean)
-        
+                              fun = mean,
+                              ID = FALSE)
+        locExtract <- as.matrix(locExtract)
         while(any(is.na(locExtract))){
-          locExtract <- extract(X, loc[i,], 
+          locExtract <- extract(X, vect(loc[i,]), 
                                 buffer = buffer,
-                                fun = mean)
+                                fun = mean,
+                                ID = FALSE)
+          locExtract <- as.matrix(locExtract)
           buffer <- buffer + buffer
         }
         
@@ -217,7 +181,7 @@ explanaMesh <- function(sPoly, meshSpace, meshTime = NULL, X = NULL, verbose = T
         locExtract <- NULL
         
         if(verbose){
-          if(any(i == round(seq(0, nlocValNA, length = 7)[-c(1,7)]))){
+          if(any(i == round(seq(0, nlocValNA, length = 20)[-c(1,20)]))){ # 20 is the number of times things are printed
             print(paste(i," out of ",nlocValNA," edges with NAs considered",
                         sep = ""))
           }
@@ -229,17 +193,14 @@ explanaMesh <- function(sPoly, meshSpace, meshTime = NULL, X = NULL, verbose = T
     locVal <- as.data.frame(locVal)
     
     # Check for factors in X and convert locVal accordingly
-    if(class(X) =="RasterBrick"){
-      X <- stack(X)
-    }
+    Xfactor <- is.factor(X)
     
-    Xfactor <- unlist(lapply(X@layers,function(x) x@data@isfactor))
-    
+    # Not sure what the following does. Computes the mean level from integer representation and than finds the mean level?
     if(any(Xfactor)){
       for(i in which(Xfactor)){
         locVal[,i] <- round(locVal[,i])
         locVal[,i] <- as.factor(locVal[,i])
-        levels(locVal[,i]) <- X@layers[[i]]@data@attributes[[1]]$ID
+        levels(locVal[,i]) <- levels(X)[[i]][,2]
       }
     }
     
@@ -256,11 +217,6 @@ explanaMesh <- function(sPoly, meshSpace, meshTime = NULL, X = NULL, verbose = T
     }else{
       results <- list(sPoly = sPoly, meshSpace = meshSpace, meshTime = meshTime, X = NULL, Xmesh = NULL)
     }
-  }
-  
-  results$sPoly <- st_as_sf(sPoly) # temporary
-  if(!is.null(results$X)){ # temporary
-    results$X <- rast(results$X)
   }
   
   class(results) <- "explanaMesh"
