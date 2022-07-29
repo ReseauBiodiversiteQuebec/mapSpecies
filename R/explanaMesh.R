@@ -163,12 +163,14 @@ explanaMesh <- function(sPoly, meshSpace, meshTime = NULL, X = NULL, verbose = T
                               vect(loc[i,]),
                               buffer = buffer,
                               fun = mean,
+                              na.rm = TRUE,
                               ID = FALSE)
         locExtract <- as.matrix(locExtract)
         while(any(is.na(locExtract))){
           locExtract <- extract(X, vect(loc[i,]), 
                                 buffer = buffer,
                                 fun = mean,
+                                na.rm = TRUE,
                                 ID = FALSE)
           locExtract <- as.matrix(locExtract)
           buffer <- buffer + buffer
