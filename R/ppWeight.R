@@ -2,7 +2,7 @@
 #' 
 #' @description This function calculates the weight that should be given to the 
 #' 
-#' @param sPoly A \code{SpatialPolygons*} object.
+#' @param sPoly An sf polygon object.
 #' @param mesh An \code{inla.mesh} object
 #' 
 #' @return 

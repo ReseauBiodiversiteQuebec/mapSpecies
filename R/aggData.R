@@ -1,9 +1,4 @@
-#' @importFrom deldir deldir
-#' @importFrom deldir tile.list
-#' @importFrom sp Polygon
-#' @importFrom sp Polygons
-#' @importFrom sp SpatialPolygons
-#' @importFrom sp over
+#' @importFrom sf st_intersects
 #' 
 aggData <- function(xyt, meshSpace, meshTime=NULL, meshDual){
   

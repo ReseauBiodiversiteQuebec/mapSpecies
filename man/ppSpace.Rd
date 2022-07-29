@@ -23,7 +23,7 @@ ppSpace(
 \arguments{
 \item{formula}{A formula that only relates the response \code{y} and some (or all) of the explanatory variables \code{X}. A paricularity of the is formula is that the response has to be defined as \code{y}.}
 
-\item{sPoints}{A \code{SpatialPoint*} object that includes the sample location of the modelled species.}
+\item{sPoints}{An sf points object that includes the sample location of the modelled species.}
 
 \item{ppWeight}{An object of class \code{ppWeight}}
 
@@ -53,7 +53,7 @@ An object of class \code{ppSpace} that includes a model output, which is the mod
 In addition, it includes a series of attributes:
 
   \item{\code{formula}}{The formula used to construct the model}
-  \item{\code{sPoints}}{A \code{SpatialPointDataFrame} object that includes the sample location and associated data of the modelled species.}
+  \item{\code{sPoints}}{An sf polygon object that includes the sample location and associated data of the modelled species.}
   \item{\code{XEst}}{A matrix with all the explanatory variables used to construct the model. If there were factors in the original set of explanatory variables \code{X}, in \code{XEst}, they were decomposed into dummy variables. The values in \code{XEst} are the one from the sampled location.}
   \item{\code{XPred}}{A matrix with all the explanatory variables used to construct the model. If there were factors in the original set of explanatory variables \code{X}, in \code{XPred}, they were decomposed into dummy variables. The values in \code{XPred} were gathered at the mesh edges. When \code{many = TRUE}, the values in \code{XPred} are exactly the same as the values in \code{XEst}}
   \item{\code{mesh}}{An object of class \code{inla.mesh}. It is the mesh used to construct the model.}

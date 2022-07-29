@@ -7,15 +7,15 @@
 explanaMesh(sPoly, meshSpace, meshTime = NULL, X = NULL, verbose = TRUE)
 }
 \arguments{
-\item{sPoly}{A \code{\link[sp]{SpatialPolygons}} or a \code{\link[sp]{SpatialPolygonsDataFrame}} defining the sampling region.}
+\item{sPoly}{An sf polygon defining the sampling region.}
 
 \item{meshSpace}{An \code{inla.mesh} object for the spatial part of the model.}
 
 \item{meshTime}{An \code{inla.mesh} object for the temporal part of the model. Default is NULL}
 
-\item{X}{A \code{\link{raster}} that includes the explanatory variables to consider for the analysis. This could also be a \code{\link[raster]{stack}} or a \code{\link[raster]{brick}}. Default is NULL.}
+\item{X}{A \code{\link{terra}} raster that includes the explanatory variables to consider for the analysis. Default is NULL.}
 
-\item{verbose}{Logical. Whether or not to print on the screen (five times) the number of edges that have been assigned values.}
+\item{verbose}{Logical. Whether or not to print on the screen (20 times) the number of edges that have been assigned values.}
 }
 \value{
 An object of class \code{explanaMesh} that includes a list of all the objects used as arguments (except for the verbose call) and \code{Xmesh} the values of the explanatory variables for all edges of the mesh.
@@ -26,11 +26,11 @@ Prepare and organise the data for model prediction. This function is meant to be
 \details{
 The time it takes to run this function is directly related to the number of vertex (points) in the mesh; more specifically the ones outside the region of interest.
 
-Also, this function checks the projections of \code{sPoly}, \code{meshSpace} and \code{X} to make sure they match. Note that if all projections are NAs, the function will run but warnings messages will be printed on screen related to this. 
+Also, this function checks the crs of \code{sPoly}, \code{meshSpace} and \code{X} to make sure they match. Note that all objects are required to have a crs.
 
 For spatiotemporal models, \code{meshTime} needs to be defined. However, it is not a necessary argument because \code{explanaMesh} is also meant to be used to build spatial model without any temporal components.
 
-When building spatiotemporal models, it is possible that explanatory variables change through time. For this reason, \code{X} should be a \code{\link[raster]{stack}} or a \code{\link[raster]{brick}} where layers associated to a particular environment variable that changes through time have the same name but are differentiated by sequential numbers separated by a point. For example, they could have the following names : "env.1", "env.2", "env.3", etc. Time associated to the environment is defined as a z-value in the raster, using \code{\link[raster]{setZ}}. For all analyses to work properly, it is essential that time be formatted in a \code{\link{POSIXct}} class, otherwise the function will send an error.
+When building spatiotemporal models, it is possible that explanatory variables change through time. For this reason, \code{X} should be a \code{\link[terra]{SpatRaster}} where layers associated to a particular environment variable that changes through time have the same name but are differentiated by sequential numbers separated by a point. For example, they could have the following names : "env.1", "env.2", "env.3", etc. Time associated to the environment is defined as a z-value in the raster, using \code{\link[terra]{time}}. For all analyses to work properly, it is essential that time be formatted in a \code{\link{POSIXct}} class, otherwise the function will send an error.
 
 If there are no explanatory variable available, it is still possible to estimate the hyper-parameters of a spatial or a spatio-temporal model through the function in the mapSpecies R package.
 }

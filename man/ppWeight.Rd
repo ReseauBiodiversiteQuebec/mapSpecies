@@ -7,7 +7,7 @@
 ppWeight(sPoly, mesh)
 }
 \arguments{
-\item{sPoly}{A \code{SpatialPolygons*} object.}
+\item{sPoly}{An sf polygon object.}
 
 \item{mesh}{An \code{inla.mesh} object}
 }
