@@ -41,6 +41,7 @@ ppWeight <- function(sPoly, mesh){
   suppressWarnings(
     cuts <- st_intersection(sPoly, dmesh[o, ])
   )
+  st_geometry(cuts)<-"geometry"
   dmeshcuts <- rbind(cuts, dmesh[within > 0L, ])
   dmeshcuts <- dmeshcuts[order(dmeshcuts$id), ]
   w <- which(as.logical(overlaps))
