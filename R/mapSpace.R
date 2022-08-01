@@ -40,13 +40,13 @@ mapSpace <- function(modelSpace, dims, sPoly = NULL, sample = FALSE, nsamples = 
   if(is.null(sPoly)){
     mapBasis <- inla.mesh.projector(attributes(modelSpace)$mesh,
                                     dims = dims,
-                                    crs = attributes(modelSpace)$mesh$crs)
+                                    crs = attributes(modelSpace)$mesh$crs$crs)
   }else{
     mapBasis <- inla.mesh.projector(attributes(modelSpace)$mesh,
                                     dims = dims,
                                     xlim = c(xmin(sPoly), xmax(sPoly)),
                                     ylim = c(ymin(sPoly), ymax(sPoly)),
-                                    crs = attributes(modelSpace)$mesh$crs)
+                                    crs = attributes(modelSpace)$mesh$crs$crs)
   }
   
   
@@ -90,8 +90,6 @@ mapSpace <- function(modelSpace, dims, sPoly = NULL, sample = FALSE, nsamples = 
   a<-simplify2array(a)
   mapRaster<-rast(a[,,dim(a)[3]:1]) # uses terra for now
   ext(mapRaster)<-c(xmin = min(mapBasis$x), xmax = max(mapBasis$x),ymin = min(mapBasis$y), ymax = max(mapBasis$y))
-  mapRaster<-stack(mapRaster)
   names(mapRaster)<-c(valsPred,paste0("space",valsSpat),valsSamp)
-
   mapRaster
 }
