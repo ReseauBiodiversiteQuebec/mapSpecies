@@ -29,6 +29,7 @@ mapSpace <- function(modelSpace, dims, sPoly = NULL, sample = FALSE, nsamples = 
   
   ### Names to extract and/or assign to layers
   valsPred<-c("mean", "sd", "0.025quant", "0.5quant", "0.975quant","mode")
+  valsLink<-c("mean", "sd", "0.025quant", "0.5quant", "0.975quant","mode")
   valsSpat<-c("mean","sd")
   if(sample){
     valsSamp<-paste0("sample",formatC(1:nsamples,width=nchar(nsamples),flag=0))
@@ -62,6 +63,9 @@ mapSpace <- function(modelSpace, dims, sPoly = NULL, sample = FALSE, nsamples = 
   ### Project predicted values
   mapPred <- as.matrix(inla.mesh.project(mapBasis, 
                                            modelSpace$summary.fitted.values[ID,valsPred]))
+  ### Project predicted values
+  mapLink <- as.matrix(inla.mesh.project(mapBasis, 
+                                         modelSpace$summary.linear.predictor[ID,valsLink]))
   
   ### Sample from posterior and project sampled values  
   if(sample){
@@ -74,9 +78,9 @@ mapSpace <- function(modelSpace, dims, sPoly = NULL, sample = FALSE, nsamples = 
     vals<-samps[grep("i:",row.names(samps)),]
     vals<-samps[1:nrow(vals),] # the second set from nrow(vals)+1 to 2*nrow(vals) is the same
     mapSamp <- as.matrix(inla.mesh.project(mapBasis,vals))
-    mat<-cbind(mapPred,mapSpat,mapSamp)
+    mat<-cbind(mapPred,mapLink,mapSpat,mapSamp)
   }else{
-    mat<-cbind(mapPred,mapSpat)
+    mat<-cbind(mapPred,mapLink,mapSpat)
   }
     
     
@@ -90,6 +94,6 @@ mapSpace <- function(modelSpace, dims, sPoly = NULL, sample = FALSE, nsamples = 
   a<-simplify2array(a)
   mapRaster<-rast(a[,,dim(a)[3]:1]) # uses terra for now
   ext(mapRaster)<-c(xmin = min(mapBasis$x), xmax = max(mapBasis$x),ymin = min(mapBasis$y), ymax = max(mapBasis$y))
-  names(mapRaster)<-c(valsPred,paste0("space",valsSpat),valsSamp)
+  names(mapRaster)<-c(valsPred,paste0("link",valsLink),paste0("space",valsSpat),valsSamp)
   mapRaster
 }
